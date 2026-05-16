@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paper Roll Value Ranker</title>
+    <!-- Material UI Font (Roboto) -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Google Material Symbols -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- App Bar -->
+        <header class="mdc-top-app-bar">
+            <div class="mdc-top-app-bar__row">
+                <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+                    <span class="material-symbols-outlined mdc-top-app-bar__icon">calculate</span>
+                    <span class="mdc-top-app-bar__title">Paper Roll Value Ranker</span>
+                </section>
+                <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end">
+                    <button id="openSettingsBtn" class="icon-button" aria-label="Settings" title="Settings">
+                        <span class="material-symbols-outlined">settings</span>
+                    </button>
+                </section>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="app-description">
+                Compare the true cost of Bounty and Charmin products by accounting for different roll sizes, pack configurations, and sheets.
+            </div>
+
+            <!-- Input Card -->
+            <div class="mdc-card form-card">
+                <h2 class="card-title">Add Product</h2>
+                <p class="card-subtitle">Enter the product title and price to calculate the true value.</p>
+
+                <form id="productForm" class="product-form">
+                    <div class="mdc-text-field">
+                        <input type="text" id="titleInput" class="mdc-text-field__input" required
+                            placeholder="e.g. 8-Pk Bounty Quick-Size Family Triple Rolls" autocomplete="off">
+                        <label class="mdc-floating-label">Product Title</label>
+                    </div>
+
+                    <div class="mdc-text-field price-field">
+                        <input type="number" id="priceInput" class="mdc-text-field__input" step="0.01" min="0" required
+                            placeholder="0.00" autocomplete="off">
+                        <span class="currency-symbol">$</span>
+                        <label class="mdc-floating-label">Price</label>
+                    </div>
+
+                    <div class="mdc-text-field">
+                        <input type="url" id="linkInput" class="mdc-text-field__input"
+                            placeholder="e.g. https://amazon.com/..." autocomplete="off">
+                        <label class="mdc-floating-label">Product Link (Optional)</label>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="mdc-button mdc-button--raised">
+                            <span class="mdc-button__label">Calculate & Add</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Error Banner -->
+            <div id="errorBanner" class="error-banner hidden">
+                <span class="material-symbols-outlined">error</span>
+                <span id="errorMessage">Could not parse product details.</span>
+            </div>
+
+            <!-- Results List -->
+            <div class="results-container">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h2 class="results-section-heading" style="margin-bottom: 0;">Value Rankings</h2>
+                    <button id="clearListBtn" class="mdc-button"
+                        style="color: var(--mdc-theme-error); height: 32px; padding: 0 8px; font-size: 0.75rem;">Clear
+                        All</button>
+                </div>
+
+                <div class="brand-ranking-section" style="margin-bottom: 32px;">
+                    <h3
+                        style="color: var(--mdc-theme-primary); border-bottom: 2px solid var(--mdc-theme-primary); padding-bottom: 4px; display: inline-block; margin-top: 0;">
+                        Bounty Paper Towels</h3>
+                    <div class="list-headers">
+                        <span>Rank</span>
+                        <span>Product</span>
+                        <span class="align-right">Cost / Reg Roll</span>
+                    </div>
+                    <div id="bountyResultsList" class="results-list">
+                        <!-- Cards will be injected here via JS -->
+                    </div>
+                </div>
+
+                <div class="brand-ranking-section">
+                    <h3
+                        style="color: var(--mdc-theme-primary); border-bottom: 2px solid var(--mdc-theme-primary); padding-bottom: 4px; display: inline-block; margin-top: 0;">
+                        Charmin Toilet Paper</h3>
+                    <div class="list-headers">
+                        <span>Rank</span>
+                        <span>Product</span>
+                        <span class="align-right">Cost / 100 Sheets</span>
+                    </div>
+                    <div id="charminResultsList" class="results-list">
+                        <!-- Cards will be injected here via JS -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal-overlay hidden">
+        <div class="modal-surface mdc-card">
+            <div class="modal-header">
+                <h2 class="card-title">Configure Roll Values</h2>
+                <button id="closeSettingsBtn" class="icon-button" aria-label="Close">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <p style="margin-top: 0; color: var(--mdc-theme-text-secondary); font-size: 0.875rem;">
+                    Configure the values for each roll size. Bounty uses "Regular Roll" multipliers. Charmin uses actual
+                    sheet counts per roll.<br />
+                    <i style="color: var(--mdc-theme-error); font-weight: bold;">Note: Due to shrinkflation, these
+                        values may need to be updated periodically to maintain accuracy.</i>
+                </p>
+                <div id="settingsContainer"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button id="resetSettingsBtn" class="mdc-button"
+                    style="margin-right: auto; color: var(--mdc-theme-error);">Reset to Defaults</button>
+                <button id="saveSettingsBtn" class="mdc-button mdc-button--raised">Save & Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
