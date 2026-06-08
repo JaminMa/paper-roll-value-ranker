@@ -63,6 +63,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadRollValues();
 
+    function loadProducts() {
+        const savedBounty = localStorage.getItem('bountyProducts');
+        if (savedBounty) {
+            try {
+                bountyProducts = JSON.parse(savedBounty);
+            } catch (e) {
+                console.error("Failed to parse saved bounty products", e);
+            }
+        }
+        const savedCharmin = localStorage.getItem('charminProducts');
+        if (savedCharmin) {
+            try {
+                charminProducts = JSON.parse(savedCharmin);
+            } catch (e) {
+                console.error("Failed to parse saved charmin products", e);
+            }
+        }
+    }
+
+    function saveProducts() {
+        localStorage.setItem('bountyProducts', JSON.stringify(bountyProducts));
+        localStorage.setItem('charminProducts', JSON.stringify(charminProducts));
+    }
+
+    loadProducts();
+    renderResults();
+
     productForm.addEventListener('submit', (e) => {
         e.preventDefault();
         hideError();
@@ -87,6 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const newProduct = {
             id: Date.now(),
+            addedAt: Date.now(),
             originalTitle: title,
             price: price,
             link: link,
@@ -110,6 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
             charminProducts.sort((a, b) => a.costPerUnit - b.costPerUnit);
         }
 
+        saveProducts();
         renderResults();
 
         // Reset inputs
@@ -123,6 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearListBtn.addEventListener('click', () => {
             bountyProducts = [];
             charminProducts = [];
+            saveProducts();
             renderResults();
         });
     }
@@ -233,6 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const isBounty = product.brand === 'Bounty';
             const unitLabel = isBounty ? 'Regular Rolls' : 'Total Sheets';
             const costDenominator = isBounty ? '/ Reg Roll' : '/ 100 Sheets';
+            const timestamp = product.addedAt ? new Date(product.addedAt).toLocaleString() : '';
 
             item.innerHTML = `
                 <div class="rank-badge">${index + 1}</div>
@@ -242,6 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="product-meta">
                         $${product.price.toFixed(2)} &bull; ${product.totalUnits} ${unitLabel}
+                        ${timestamp ? `<br><span class="timestamp-label" style="font-size: 0.75rem; color: var(--mdc-theme-text-secondary); opacity: 0.8;">Added: ${timestamp}</span>` : ''}
                     </div>
                 </div>
                 <div class="cost-info">
@@ -406,6 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
         recalculateList(bountyProducts);
         recalculateList(charminProducts);
 
+        saveProducts();
         renderResults();
     }
 
